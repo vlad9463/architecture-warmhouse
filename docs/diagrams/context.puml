@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Теплый дом — текущая система (As-Is)
+
+Person(user, "Пользователь", "Владелец дома")
+
+System(warmhouse, "Теплый дом", "Монолитное приложение на Go")
+System_Ext(device, "Датчик и модуль управления в доме", "Измеряет температуру и управляет отоплением")
+
+Rel(user, warmhouse, "Управляет отоплением и просматривает температуру")
+Rel(warmhouse, device, "Передает команды управления отоплением")
+Rel(warmhouse, device, "Запрашивает температуру")
+Rel(device, warmhouse, "Передает данные о температуре")
+
+SHOW_LEGEND()
+
+@enduml
