@@ -1,0 +1,69 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Теплый дом — целевая архитектура (To-Be)
+
+Person(user, "Пользователь", "Владелец дома")
+
+System_Ext(devices, "Устройства умного дома", "Датчики, реле, освещение, ворота, камеры и устройства партнеров")
+
+System_Boundary(warmhouse, "Экосистема Теплый дом") {
+
+    Container(web, "Web Application", "Web", "Интерфейс самообслуживания пользователя")
+    Container(apiGateway, "API Gateway", "REST API", "Единая точка входа в систему")
+
+    Container(userService, "User & House Service", "Microservice", "Управление пользователями и домами")
+    Container(deviceService, "Device Management Service", "Microservice", "Подключение и настройка устройств")
+
+    Container(heatingService, "Heating Service", "Microservice", "Управление отоплением")
+    Container(lightingService, "Lighting Service", "Microservice", "Управление освещением")
+    Container(gateService, "Gate Service", "Microservice", "Управление воротами")
+    Container(surveillanceService, "Surveillance Service", "Microservice", "Управление камерами и наблюдением")
+
+    Container(scenarioService, "Scenario Service", "Microservice", "Создание и выполнение сценариев автоматизации")
+    Container(telemetryService, "Telemetry Service", "Microservice", "Прием и хранение телеметрии")
+
+    Container(messageBroker, "Message Broker", "RabbitMQ", "Асинхронная передача команд и событий")
+    Container(deviceGateway, "Device Gateway", "Integration Service", "Взаимодействие с устройствами по поддерживаемым протоколам")
+
+    ContainerDb(userDb, "User & House DB", "PostgreSQL", "Пользователи и дома")
+    ContainerDb(deviceDb, "Device DB", "PostgreSQL", "Устройства и их настройки")
+    ContainerDb(scenarioDb, "Scenario DB", "PostgreSQL", "Сценарии автоматизации")
+    ContainerDb(telemetryDb, "Telemetry DB", "PostgreSQL", "История телеметрии")
+}
+
+Rel(user, web, "Работает с", "HTTPS")
+Rel(web, apiGateway, "Вызывает API", "HTTPS")
+
+Rel(apiGateway, userService, "Управляет пользователями и домами", "REST")
+Rel(apiGateway, deviceService, "Управляет устройствами", "REST")
+Rel(apiGateway, heatingService, "Управляет отоплением", "REST")
+Rel(apiGateway, lightingService, "Управляет освещением", "REST")
+Rel(apiGateway, gateService, "Управляет воротами", "REST")
+Rel(apiGateway, surveillanceService, "Управляет наблюдением", "REST")
+Rel(apiGateway, scenarioService, "Управляет сценариями", "REST")
+Rel(apiGateway, telemetryService, "Запрашивает телеметрию", "REST")
+
+Rel(userService, userDb, "Читает и записывает")
+Rel(deviceService, deviceDb, "Читает и записывает")
+Rel(scenarioService, scenarioDb, "Читает и записывает")
+Rel(telemetryService, telemetryDb, "Читает и записывает")
+
+Rel(heatingService, messageBroker, "Публикует команды отопления")
+Rel(lightingService, messageBroker, "Публикует команды освещения")
+Rel(gateService, messageBroker, "Публикует команды ворот")
+Rel(surveillanceService, messageBroker, "Публикует команды устройствам")
+
+Rel(scenarioService, messageBroker, "Публикует команды")
+Rel(messageBroker, scenarioService, "Передает события")
+Rel(messageBroker, telemetryService, "Передает телеметрию")
+
+Rel(messageBroker, deviceGateway, "Передает команды")
+Rel(deviceGateway, messageBroker, "Публикует события и телеметрию")
+
+Rel(deviceGateway, devices, "Передает команды", "Стандартные протоколы")
+Rel(devices, deviceGateway, "Передает состояние и телеметрию", "Стандартные протоколы")
+
+SHOW_LEGEND()
+
+@enduml
